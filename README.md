@@ -1,2 +1,60 @@
-# Interrogazione_di_contenuti_video_tramite_sistema_RAG
-Il progetto mira a creare un sistema RAG (Retrieval-Augmented Generation) per recuperare informazioni dai video di YouTube attraverso un'interfaccia utente.
+# 🎓 Interrogazione di contenuti video tramite sistema RAG
+
+![Python](https://img.shields.io/badge/Python-3.9%2B-1B365D?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.0.3-000000?style=for-the-badge&logo=flask&logoColor=white)
+![FAISS](https://img.shields.io/badge/FAISS-Vector%20DB-red?style=for-the-badge)
+![LM Studio](https://img.shields.io/badge/LM%20Studio-Local%20LLM-27AE60?style=for-the-badge)
+![Ragas](https://img.shields.io/badge/Ragas-Evaluation-orange?style=for-the-badge)
+
+**Progetto di Natural Language Processing (A.A. 2025/2026)**  
+**Autori:** Sabato Malafronte, Antonio Di Lauro  
+
+---
+
+## 📌 Panoramica del Progetto
+
+Questo progetto implementa un'architettura **RAG (Retrieval-Augmented Generation)** avanzata, progettata per estrarre, indicizzare e interrogare il contenuto di videolezioni e video di YouTube attraverso un'interfaccia web intuitiva[cite: 4, 5]. 
+
+Il sistema supera i limiti del tradizionale chunking a caratteri fissi adottando una **vettorizzazione semantica dinamica**: il testo viene segmentato in tempo reale riconoscendo i cambi di argomento basati sulla distanza euclidea e sulla similarità del coseno degli embedding. L'interferenza e la generazione delle risposte sono affidate a Large Language Models (LLM) eseguiti interamente in locale tramite **LM Studio**, garantendo privacy e assenza di costi di API esterne.
+
+---
+
+## ✨ Funzionalità Chiave
+
+* **Estrazione Sottotitoli con Fallback:** Utilizzo di `youtube-transcript-api` per scaricare le tracce in italiano, con passaggio automatico alla lingua inglese o alla prima lingua disponibile in caso di assenza dei sottotitoli locali[cite: 4].
+* **Chunking Semantico Dinamico:** La segmentazione del testo avviene valutando la similarità tra frasi consecutive tokenizzate tramite NLTK[cite: 4]. È impostata una soglia di similarità ottimizzata a `0.78` con un freno d'emergenza di massimo `12` frasi per blocco[cite: 4].
+* **Database Vettoriale FAISS:** Gli embedding sono generati tramite il modello `intfloat/multilingual-e5-base` e indicizzati in memoria con struttura `IndexFlatL2` per una ricerca semantica ultra-rapida[cite: 4].
+* **Filtro di Tolleranza L2:** Il sistema scarta automaticamente i chunk recuperati che superano una soglia di distanza euclidea pari a `0.415`, impedendo all'LLM di ricevere contesto irrilevante[cite: 4].
+* **Doppia Modalità di Conversazione:**
+  * 👨‍🏫 **Assistente Standard:** Risposte dirette, rigorose e basate esclusivamente sul contesto (Temperatura: `0.1`)[cite: 4, 5].
+  * 🏛️ **Dialogo Socratico:** Il modello guida lo studente al ragionamento critico senza fornire risposte preconfezionate (Temperatura: `0.4`)[cite: 4, 5].
+* **Gestione Multi-Video:** Interfaccia web dotata di menu a scorrimento per isolare indici FAISS e storici di conversazione (ultimi 4 messaggi) in base al video selezionato[cite: 4, 5].
+* **Valutazione e Stress Testing:** Integrazione nativa del framework **RAGAS** per misurare *Faithfulness* e *Answer Relevancy*, con esportazione automatica dei report in fogli Excel multi-scheda.
+
+---
+
+## 🛠️ Stack Tecnologico e Architettura
+
+| Componente | Tecnologia / Libreria | Dettaglio / Modello |
+| :--- | :--- | :--- |
+| **Backend Web** | Flask | Routing, gestione sessioni e API REST[cite: 4] |
+| **NLP & Tokenization** | NLTK | Moduli `punkt` e `punkt_tab` per sentence tokenization[cite: 4] |
+| **Embedding Model** | Sentence Transformers | `intfloat/multilingual-e5-base` (vettori densi)[cite: 4] |
+| **Vector Database** | FAISS CPU | Ricerca di similarità L2 (`IndexFlatL2`)[cite: 4] |
+| **LLM Inference** | LM Studio / OpenAI Client | Server locale su porta `localhost:1234`[cite: 4] |
+| **Modelli LLM Testati** | Llama / Qwen / Gemma | `meta-llama-3.1-8b-instruct`, `qwen2.5-1.5b-instruct`[cite: 4] |
+| **Evaluation Framework** | RAGAS & Langchain | Valutazione real-time e batch con LLM-as-a-Judge[cite: 2, 4] |
+| **Frontend** | HTML5, CSS3, JS Vanilla | Interfaccia reattiva con animazioni Skeleton e Spinner[cite: 5] |
+
+---
+
+## 📁 Struttura della Repository
+
+```text
+├── app.py # Server backend Flask, logica RAG e gestione DB FAISS[cite: 4]
+├── grid_search.py # Algoritmo di ottimizzazione empirica delle soglie di chunking
+├── test_ragas.py # Script di stress-test multi-video ed esportazione Excel[cite: 2]
+├── dataset_ragas_multi_video.json # Dataset di benchmarking (Telegiornali, Lezioni, Doc)[cite: 3]
+├── requirements.txt # Dipendenze esatte del progetto
+└── templates/
+    └── index.html # Interfaccia utente web[cite: 5]

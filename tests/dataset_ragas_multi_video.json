@@ -1,0 +1,102 @@
+{
+  "TELEGIORNALE": {
+    "url": "https://www.youtube.com/watch?v=vNOHdve4ClE",
+    "domande": {
+      "DOMANDE PERTINENTI": [
+        "quanti uomini sono scomparsi a Pesaro?",
+        "da chi è nata l'idea di fare un documentario sulla battaglia del Metauro?",
+        "Quale è l'idea di infrastrutture prevista da RFI?"
+      ],
+      "DOMANDE DEL CONTESTO MA NON PERTINENTI": [
+        "Esiste un termine minimo entro il quale denunciare nel caso una persona scompaia?",
+        "Quanti incidenti sul lavoro capitano ogni giorno in Campania?",
+        "Quali sono le normative sulla mobilità sostenibile?"
+      ],
+      "DOMANDE NON PERTINENTI": [
+        "Quale è la capitale della Francia?",
+        "Quanti geni ha il DNA di un essere umano?",
+        "Quale è la stella più vicina alla Terra dopo il Sole?"
+      ]
+    }
+  },
+  "DOCUMENTARIO": {
+    "url": "https://www.youtube.com/watch?v=EtJb5fafOkc",
+    "domande": {
+      "DOMANDE PERTINENTI": [
+        "In che periodo Adolf Hitler fu nominato cancelliere?",
+        "Come era composta la Vermacht nel 1939?",
+        "Chi erano i pirati dell'Edel?"
+      ],
+      "DOMANDE DEL CONTESTO MA NON PERTINENTI": [
+        "Come si chiamava l'esercito della Germania Ovest?",
+        "Quale è stato il ruolo della Cina nella seconda guerra mondiale?",
+        "In che modo il bolscevismo ha influenzato gli anni della guerra fredda?"
+      ],
+      "DOMANDE NON PERTINENTI": [
+        "Quale è la capitale della Francia?",
+        "Quanti geni ha il DNA di un essere umano?",
+        "Quale è la stella più vicina alla Terra dopo il Sole?"
+      ]
+    }
+  },
+  "LEZIONE UNIVERSITÀ": {
+    "url": "https://www.youtube.com/watch?v=qonQz-I87aQ",
+    "domande": {
+      "DOMANDE PERTINENTI": [
+        "Cos'è un insieme limitato superiormente?",
+        "In quanti modi si possono ordinare n oggetti?",
+        "Se moltiplichiamo due numeri razionali cosa otteniamo?"
+      ],
+      "DOMANDE DEL CONTESTO MA NON PERTINENTI": [
+        "Chi è stato il primo popolo ad utilizzare i numeri razionali?",
+        "Chi ha dimostrato l'irrazionalità di radice di due?",
+        "Quale è la dimostrazione del teorema di fermat?"
+      ],
+      "DOMANDE NON PERTINENTI": [
+        "Quale è la capitale della Francia?",
+        "Quanti geni ha il DNA di un essere umano?",
+        "Quale è la stella più vicina alla Terra dopo il Sole?"
+      ]
+    }
+  },
+  "SPETTACOLO": {
+    "url": "https://www.youtube.com/watch?v=xZPYc3CU1Do",
+    "domande": {
+      "DOMANDE PERTINENTI": [
+        "quali sono i piatti tipici dell'autogrill?",
+        "Cosa ha fatto il principe azzurro quando è arrivato a cavallo?",
+        "A quale pittore hanno rubato la tela?"
+      ],
+      "DOMANDE DEL CONTESTO MA NON PERTINENTI": [
+        "Cosa ha fatto cappuccetto rosso?",
+        "Dove nasce la figura del principe azzurro?",
+        "Chi sono i personaggi principali del teatro napoletano?"
+      ],
+      "DOMANDE NON PERTINENTI": [
+        "Quale è la capitale della Francia?",
+        "Quanti geni ha il DNA di un essere umano?",
+        "Quale è la stella più vicina alla Terra dopo il Sole?"
+      ]
+    }
+  },
+  "HIGHLIGHTS": {
+    "url": "https://www.youtube.com/watch?v=-lFNneepo5M",
+    "domande": {
+      "DOMANDE PERTINENTI": [
+        "Come è finita la conclusione di Raspadori?",
+        "Quanti gol ha fatto Lukaku nel campionato?",
+        "Dopo quanto tempo il Napoli ha tornato a vincere il campionato?"
+      ],
+      "DOMANDE DEL CONTESTO MA NON PERTINENTI": [
+        "In che squadra giocava Lukaku prima di arrivare a Napoli?",
+        "Quanto è finita Inter-Napoli dell'anno 2024/2025?",
+        "Quanti sono i calciatori che scendono in campo in una partita?"
+      ],
+      "DOMANDE NON PERTINENTI": [
+        "Quale è la capitale della Francia?",
+        "Quanti geni ha il DNA di un essere umano?",
+        "Quale è la stella più vicina alla Terra dopo il Sole?"
+      ]
+    }
+  }
+}

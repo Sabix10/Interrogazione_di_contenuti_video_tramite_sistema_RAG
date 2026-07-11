@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tester RAG Completo (FAISS + LM Studio)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; max-width: 900px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        .card { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
+
+        /* Stile specifico per il nuovo menu superiore */
+        .menu-card { background: #2c3e50; color: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .menu-card h2 { color: #ecf0f1; border-bottom: 1px solid #34495e; padding-bottom: 5px; margin-top: 0; }
+        select { width: 100%; padding: 12px; border: 1px solid #34495e; border-radius: 6px; font-size: 16px; background-color: #34495e; color: white; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        select:focus { outline: none; background-color: #1a252f; }
+        option { background-color: #fff; color: #333; font-weight: normal; }
+
+        input[type="text"], input[type="number"] { width: calc(100% - 22px); padding: 12px; margin: 10px 0; border: 1px solid #ced4da; border-radius: 6px; font-size: 16px; transition: border-color 0.3s; }
+        input[type="text"]:focus { border-color: #3498db; outline: none; }
+        input[type="number"] { width: 80px; }
+        button { background-color: #3498db; color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; transition: background 0.3s, transform 0.1s; }
+        button:hover { background-color: #2980b9; }
+        button:active { transform: scale(0.98); }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .status { margin-top: 15px; font-weight: bold; }
+        .success { color: #27ae60; background: #e8f8f5; padding: 10px; border-radius: 4px; display: inline-block;}
+        .error { color: #e74c3c; background: #fdedec; padding: 10px; border-radius: 4px; display: inline-block;}
+        .chunk { background: #f8f9fa; padding: 15px; margin-top: 15px; border-left: 5px solid #3498db; border-radius: 4px; }
+        .llm-response { background: #ebf5fb; padding: 20px; margin-top: 15px; border-left: 5px solid #2ecc71; border-radius: 4px; white-space: pre-wrap; font-family: inherit; }
+        .spinner { display: none; margin-left: 10px; font-size: 14px; color: #7f8c8d; font-style: italic; }
+        .flex-row { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
+        .flex-row input[type="text"] { flex-grow: 1; margin: 0; }
+
+        /* Skeleton Loader Animation */
+        .skeleton {
+            background-color: #e0e0e0;
+            background-image: linear-gradient(90deg, #e0e0e0 0px, #ededed 40px, #e0e0e0 80px);
+            background-size: 200px 100%;
+            background-repeat: no-repeat;
+            border-radius: 4px;
+            height: 16px;
+            margin-bottom: 8px;
+            animation: skeleton-pulse 1.5s infinite linear;
+        }
+
+        .radio-group { margin-bottom: 15px; background: #f8f9fa; padding: 10px 15px; border-radius: 6px; border: 1px solid #e2e8f0; display: inline-flex; gap: 20px; }
+        .radio-group label { cursor: pointer; font-weight: 500; color: #333;}
+
+        @keyframes skeleton-pulse {
+            0% { background-position: -150px 0; }
+            100% { background-position: 150px 0; }
+        }
+
+        .user-msg { margin-bottom: 10px; color: #2980b9; }
+        .bot-msg { margin-bottom: 15px; color: #2c3e50; }
+        #chatResultContainer { max-height: 400px; overflow-y: auto; padding: 5px; border-radius: 4px; }
+
+        /* Animazione di rotazione a 360 gradi */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Applica la rotazione all'icona (o alla clessidra) */
+        .loading-icon {
+            display: inline-block; /* Fondamentale: i tag inline come span non possono ruotare senza questo */
+            animation: spin 1.5s infinite linear;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎓 Assistente Universitario RAG</h1>
+
+    <!-- 🎛️ NUOVO: MENU DI SELEZIONE VIDEOLEZIONE -->
+    <div class="menu-card">
+        <h2>📺 Videolezione Attiva</h2>
+        <select id="videoSelect" onchange="switchVideo()">
+            <option value="">-- Nessuna videolezione caricata. Elabora un link sotto per iniziare --</option>
+        </select>
+    </div>
+
+    <!-- STEP 1: CARICAMENTO -->
+    <div class="card">
+        <h2>Inizializza il Sistema (Inserisci url video)</h2>
+        <p>Incolla l'URL di un video YouTube per scaricare la trascrizione e aggiungerlo all'archivio dell'applicazione.</p>
+        <div class="flex-row">
+            <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+            <button id="btnProcess" onclick="processVideo()">Elabora ed Archivia</button>
+        </div>
+        <span id="processSpinner" class="spinner">
+            <span class="loading-icon">⏳</span> Vettorizzazione in corso (potrebbe richiedere tempo)...
+        </span>
+        <div id="processStatus" class="status"></div>
+    </div>
+
+    <!-- STEP 2: CHATBOT -->
+    <div class="card">
+        <h2>Interroga l'LLM (Assistente)</h2>
+        <p>Scegli lo stile di conversazione e fai una domanda. La chat è isolata e legata solo alla lezione attiva.</p>
+
+        <div class="radio-group">
+            <label>
+                <input type="radio" name="chatMode" value="standard" checked> 👨‍🏫 Assistente Standard
+            </label>
+            <label>
+                <input type="radio" name="chatMode" value="socratic"> 🏛️ Dialogo Socratico
+            </label>
+        </div>
+
+        <div class="flex-row">
+            <input type="text" id="chatQuery" placeholder="Fai una domanda sul contenuto del video..." disabled>
+            <button id="btnChat" onclick="askChatbot()" disabled>Chiedi all'AI</button>
+        </div>
+        <div id="chatResultContainer"></div>
+    </div>
+
+    <script>
+        let loadedVideos = {};
+        let currentVideoId = null;
+
+        // Funzione helper per abilitare/disabilitare i controlli legati al video attivo
+        function toggleUI(enabled) {
+            // Elenco degli ID che la funzione si aspetta di trovare nell'HTML
+            const elementsToToggle = ['searchQuery', 'kResults', 'btnSearch', 'chatQuery', 'btnChat'];
+
+            elementsToToggle.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.disabled = !enabled;
+                } else {
+                    // Questo ti dirà in console esattamente cosa manca senza bloccare il programma
+                    console.warn(`[RAG Warning] Elemento con ID "${id}" non trovato nel DOM.`);
+                }
+            });
+        }
+
+        // --- CAMBIO VIDEO DAL MENU ---
+        function switchVideo() {
+            const select = document.getElementById('videoSelect');
+            if (!select) {
+                console.warn('[RAG Warning] Impossibile cambiare video: "videoSelect" non trovato.');
+                return;
+            }
+
+            const selectedId = select.value;
+            const chatContainer = document.getElementById('chatResultContainer');
+
+            // Salviamo lo stato della chat precedente
+            if (currentVideoId && loadedVideos[currentVideoId] && chatContainer) {
+                loadedVideos[currentVideoId].chatHTML = chatContainer.innerHTML;
+            }
+
+            currentVideoId = selectedId;
+
+            if (!currentVideoId) {
+                toggleUI(false);
+                if (chatContainer) chatContainer.innerHTML = '';
+                const searchRes = document.getElementById('searchResultsContainer');
+                if (searchRes) searchRes.innerHTML = '';
+                return;
+            }
+
+            toggleUI(true);
+
+            // Ripristina la chat del nuovo video selezionato
+            if (chatContainer) {
+                chatContainer.innerHTML = loadedVideos[currentVideoId].chatHTML || '';
+            }
+
+            // Pulisce i vecchi risultati di ricerca chunk
+            const searchRes = document.getElementById('searchResultsContainer');
+            if (searchRes) searchRes.innerHTML = '';
+            const searchStatus = document.getElementById('searchStatus');
+            if (searchStatus) searchStatus.innerHTML = '';
+
+            console.log(`Contesto aggiornato sulla lezione: ${currentVideoId}`);
+        }
+
+        // --- ELABORA ED ARCHIVIA VIDEO ---
+        async function processVideo() {
+            const urlInput = document.getElementById('videoUrl');
+            const url = urlInput ? urlInput.value.trim() : '';
+            const statusDiv = document.getElementById('processStatus');
+            const spinner = document.getElementById('processSpinner');
+            const btnProcess = document.getElementById('btnProcess');
+
+            if (!url) {
+                if (statusDiv) statusDiv.innerHTML = '<span class="error">Inserisci un URL valido.</span>';
+                return;
+            }
+
+            if (statusDiv) statusDiv.innerHTML = '';
+            if (spinner) spinner.style.display = 'inline';
+            if (btnProcess) btnProcess.disabled = true;
+
+            try {
+                const response = await fetch('/process_video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (statusDiv) statusDiv.innerHTML = `<span class="success">${data.message}</span>`;
+                    const videoId = data.video_id;
+                    const videoTitle = data.title;
+
+                    if (!loadedVideos[videoId]) {
+                        loadedVideos[videoId] = {
+                            url: url,
+                            title: videoTitle,
+                            chatHTML: ""
+                        };
+
+                        const select = document.getElementById('videoSelect');
+                        if (select) {
+                            // Svuota il messaggio placeholder di default al caricamento del primo video
+                            if (Object.keys(loadedVideos).length === 1) {
+                                select.innerHTML = '';
+                            }
+
+                            // Creiamo il nuovo elemento del menu usando il titolo del video
+                            const option = document.createElement('option');
+                            option.value = videoId;
+                            option.textContent = `${videoTitle}`;
+                            select.appendChild(option);
+                        }
+                    }
+
+                    const select = document.getElementById('videoSelect');
+                    if (select) select.value = videoId;
+
+                    switchVideo();
+
+                    if (urlInput) urlInput.value = '';
+                } else {
+                    // Se il backend risponde con un errore (es. sottotitoli mancanti), lo stampa chiaramente a schermo
+                    if (statusDiv) statusDiv.innerHTML = `<span class="error">Errore: ${data.error}</span>`;
+                }
+            } catch (error) {
+                if (statusDiv) statusDiv.innerHTML = `<span class="error">Errore di connessione: ${error}</span>`;
+                console.error(error);
+            } finally {
+                if (spinner) spinner.style.display = 'none';
+                if (btnProcess) btnProcess.disabled = false;
+            }
+        }
+
+        // --- TEST RETRIEVAL ---
+        async function testRetrieval() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const k = document.getElementById('kResults').value;
+            const statusDiv = document.getElementById('searchStatus');
+            const spinner = document.getElementById('searchSpinner');
+            const btnSearch = document.getElementById('btnSearch');
+            const resultsContainer = document.getElementById('searchResultsContainer');
+
+            if (!query || !currentVideoId) return;
+
+            statusDiv.innerHTML = '';
+            spinner.style.display = 'inline';
+            btnSearch.disabled = true;
+            resultsContainer.innerHTML = '';
+
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: query,
+                        k: k,
+                        video_id: currentVideoId // Passiamo l'ID attivo per isolare la ricerca vettoriale
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.results.length === 0) {
+                        resultsContainer.innerHTML = '<div class="chunk">Nessun chunk rispetta la soglia di distanza impostata.</div>';
+                    } else {
+                        data.results.forEach((chunk, index) => {
+                            const div = document.createElement('div');
+                            div.className = 'chunk';
+                            div.innerHTML = `<strong>Chunk ${index + 1}:</strong><br> ${chunk}`;
+                            resultsContainer.appendChild(div);
+                        });
+                    }
+                } else {
+                    statusDiv.innerHTML = `<span class="error">Errore: ${data.error}</span>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<span class="error">Errore di rete: ${error}</span>`;
+            } finally {
+                spinner.style.display = 'none';
+                btnSearch.disabled = false;
+            }
+        }
+
+        // --- CHATBOT ISOLATO PER VIDEOLEZIONE ---
+        async function askChatbot() {
+            const input = document.getElementById('chatQuery');
+            const query = input.value.trim();
+            if (!query || !currentVideoId) return;
+
+            const container = document.getElementById('chatResultContainer');
+            const mode = document.querySelector('input[name="chatMode"]:checked').value;
+
+            const modeBadge = mode === 'socratic' ? '🔧 [Soc]' : '📝 [Std]';
+            container.innerHTML += `<div class="user-msg"><b>Tu ${modeBadge}:</b> ${query}</div>`;
+            input.value = '';
+
+            // Genera ID unico per lo Skeleton loader reattivo
+            const skeletonId = 'skeleton-' + Date.now();
+            container.innerHTML += `
+                <div id="${skeletonId}" class="bot-msg">
+                    <b>Assistente:</b>
+                    <div class="skeleton" style="width: 80%;"></div>
+                    <div class="skeleton" style="width: 55%;"></div>
+                </div>`;
+
+            container.scrollTop = container.scrollHeight;
+
+            // Preparazione dei parametri per la chiamata a Flask
+            const formData = new FormData();
+            formData.append('query', query);
+            formData.append('mode', mode);
+            formData.append('video_id', currentVideoId); // Dice al backend quale db vettoriale usare
+            formData.append('session_id', `session_user_${currentVideoId}`); // Isola la memoria della chat sul backend per questo video specifico
+
+            try {
+                const response = await fetch('/chatbot', { method: 'POST', body: formData });
+                const reply = await response.text();
+
+                // Rimuove l'animazione di caricamento e scrive la risposta dell'LLM
+                document.getElementById(skeletonId).remove();
+                container.innerHTML += `<div class="bot-msg"><b>Assistente:</b> ${reply}</div>`;
+            } catch (error) {
+                document.getElementById(skeletonId).remove();
+                container.innerHTML += `<div class="error">Errore durante la generazione della risposta.</div>`;
+            } finally {
+                container.scrollTop = container.scrollHeight;
+                // Aggiorna lo stato salvato in locale con il nuovo pezzo di conversazione
+                loadedVideos[currentVideoId].chatHTML = container.innerHTML;
+            }
+        }
+
+        // Permette l'invio premendo il tasto "Invio" sulle rispettive caselle di testo
+        document.getElementById('chatQuery').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') askChatbot();
+        });
+        document.getElementById('searchQuery').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') testRetrieval();
+        });
+    </script>
+</body>
+</html>

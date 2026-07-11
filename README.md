@@ -54,8 +54,8 @@ Il sistema supera i limiti del tradizionale chunking a caratteri fissi adottando
 ├── app.py # Server backend Flask, logica RAG e gestione DB FAISS
 ├── requirements.txt # Dipendenze esatte del progetto
 └── tests/
-    ├── grid_search.py # Algoritmo di ottimizzazione empirica delle soglie di chunking
-    ├── test_ragas.py # Script di stress-test multi-video ed esportazione Excel
-    └── dataset_ragas_multi_video.json # Dataset di benchmarking (Telegiornali, Lezioni, Doc)
+.   ├── grid_search.py # Algoritmo di ottimizzazione empirica delle soglie di chunking
+.   ├── test_ragas.py # Script di stress-test multi-video ed esportazione Excel
+.   └── dataset_ragas_multi_video.json # Dataset di benchmarking (Telegiornali, Lezioni, Doc)
 └── templates/
     └── index.html # Interfaccia utente web
